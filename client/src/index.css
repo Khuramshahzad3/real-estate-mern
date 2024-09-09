@@ -4,4 +4,11 @@
 
 body{
     background-color: rgb(241, 245, 241);
+    /* font-family: "Poppins" ; */
 }
+@layer base {
+    @font-face {
+      font-family: "Poppins";
+      src: url(./assets/Poppins-Regular.ttf);
+    }
+  }
