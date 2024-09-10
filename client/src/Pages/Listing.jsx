@@ -15,6 +15,7 @@ import {
   FaShare,
 } from "react-icons/fa";
 import Contact from "../Components/Contact";
+import axios from "axios";
 
 // https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
 
@@ -32,8 +33,8 @@ export default function Listing() {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/listing/get/${params.listingId}`);
-        const data = await res.json();
+        const res = await axios.get(`/api/listing/get/${params.listingId}`);
+        const data = await res.data;
         if (data.success === false) {
           setError(true);
           setLoading(false);

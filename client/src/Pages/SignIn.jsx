@@ -8,6 +8,7 @@ import {
   Signinsuccess,
 } from "../redux/user/UserSlice";
 import OAuth from "../Components/OAuth";
+import axios from "axios";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({});
@@ -24,14 +25,12 @@ const SignIn = () => {
     e.preventDefault();
     try {
       dispatch(SigninStart());
-      const res = await fetch("/api/auth/signin", {
-        method: "POST",
+      const res = await axios.post("/api/auth/signin", formData, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
       });
-      const data = await res.json();
+      const data = await res.data;
       console.log(data);
       if (data.success === false) {
         dispatch(SigninFailed(data.message));
@@ -43,7 +42,7 @@ const SignIn = () => {
       dispatch(SigninFailed(error.message));
     }
   };
-  console.log(error)
+  console.log(error);
   useEffect(() => {
     dispatch(ClearError());
   }, [dispatch]);

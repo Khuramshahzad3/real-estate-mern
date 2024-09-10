@@ -21,6 +21,8 @@ import {
   signOutUserFailed,
   signOutUserSuccess,
 } from "../redux/user/UserSlice";
+import axios from "axios"; // Import axios
+
 export default function Profile() {
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -33,12 +35,6 @@ export default function Profile() {
   const [userListings, setUserListings] = useState([]);
   const [showListingsClicked, setShowListingsClicked] = useState(false);
   const dispatch = useDispatch();
-
-  // firebase storage
-  // allow read;
-  // allow write: if
-  // request.resource.size < 5 * 1024 * 1024 &&
-  // request.resource.contentType.matches('image/.*')
 
   useEffect(() => {
     if (file) {
@@ -78,14 +74,18 @@ export default function Profile() {
     e.preventDefault();
     try {
       dispatch(UpdateUserStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
+
+      const response = await axios.post(
+        `/api/user/update/${currentUser._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = response.data;
       if (data.success === false) {
         dispatch(UpdateUserFailed(data.message));
         return;
@@ -101,10 +101,9 @@ export default function Profile() {
   const handleDeleteUser = async () => {
     try {
       dispatch(DeleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
+
+      const response = await axios.delete(`/api/user/delete/${currentUser._id}`);
+      const data = response.data;
       if (data.success === false) {
         dispatch(DeleteUserFailed(data.message));
         return;
@@ -118,23 +117,25 @@ export default function Profile() {
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch("/api/auth/signout");
-      const data = await res.json();
+
+      const response = await axios.get("/api/auth/signout");
+      const data = response.data;
       if (data.success === false) {
         dispatch(signOutUserFailed(data.message));
         return;
       }
       dispatch(signOutUserSuccess(data));
     } catch (error) {
-      dispatch(signOutUserFailed(data.message));
+      dispatch(signOutUserFailed(error.message));
     }
   };
 
   const handleShowListings = async () => {
     try {
       setShowListingsError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
-      const data = await res.json();
+
+      const response = await axios.get(`/api/user/listings/${currentUser._id}`);
+      const data = response.data;
       setShowListingsClicked(true);
       if (data.success === false) {
         setShowListingsError(true);
@@ -149,10 +150,8 @@ export default function Profile() {
 
   const handleListingDelete = async (listingId) => {
     try {
-      const res = await fetch(`/api/listing/delete/${listingId}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
+      const response = await axios.delete(`/api/listing/delete/${listingId}`);
+      const data = response.data;
       if (data.success === false) {
         console.log(data.message);
         return;
@@ -165,6 +164,7 @@ export default function Profile() {
       console.log(error.message);
     }
   };
+
   return (
     <div className="p-3 max-w-lg mx-auto mb-80">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -295,8 +295,6 @@ export default function Profile() {
           ? "no listing found"
           : ""}
       </p>
-
-      
     </div>
   );
 }
